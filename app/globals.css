@@ -1,0 +1,116 @@
+:root {
+  --background: #f6f7fb;
+  --foreground: #101828;
+  --card: #ffffff;
+  --border: #e4e7ec;
+  --muted: #475467;
+  --accent: #1d4ed8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.grid2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+}
+
+p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.field,
+.stack {
+  display: grid;
+  gap: 0.5rem;
+}
+
+input,
+textarea,
+button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  width: fit-content;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.status {
+  color: var(--accent);
+}
+
+.assistantReply {
+  border-left: 4px solid var(--accent);
+  padding-left: 0.75rem;
+}
+
+.stackList,
+.history {
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.stackList li,
+.history li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: #fcfcfd;
+}
+
+.role {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-weight: 600;
+}
