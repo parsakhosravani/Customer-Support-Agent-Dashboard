@@ -1,29 +1,10 @@
 "use client";
 
 import { FormEvent, useCallback, useMemo, useState } from "react";
-
-type Source = {
-  id: string;
-  title: string;
-  snippet: string;
-};
-
-type TimelineStep = {
-  tool: string;
-  status: "started" | "completed";
-  detail: string;
-};
-
-type Conversation = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  sources: Source[];
-  timeline: TimelineStep[];
-  createdAt: string;
-};
+import type { ConversationRecord as Conversation, Source, TimelineStep } from "@/lib/types";
 
 const textDecoder = new TextDecoder();
+const MAX_RECENT_CONVERSATIONS = 10;
 
 export default function Home() {
   const [merchantId, setMerchantId] = useState("default-merchant");
@@ -42,9 +23,12 @@ export default function Home() {
   }, [merchantId]);
 
   const recentConversations = useMemo(
-    () => conversationHistory.slice(-10),
+    () => conversationHistory.slice(-MAX_RECENT_CONVERSATIONS),
     [conversationHistory],
   );
+  const handleRefreshHistory = () => {
+    void loadHistory();
+  };
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -223,8 +207,8 @@ export default function Home() {
             <p>No timeline yet.</p>
           ) : (
             <ul className="stackList">
-              {latestTimeline.map((step, index) => (
-                <li key={`${step.tool}-${index}`}>
+              {latestTimeline.map((step) => (
+                <li key={step.id}>
                   <strong>{step.tool}</strong> ({step.status})
                   <p>{step.detail}</p>
                 </li>
@@ -236,7 +220,7 @@ export default function Home() {
 
       <section className="card">
         <h2>Conversation history</h2>
-        <button type="button" onClick={() => void loadHistory()}>
+        <button type="button" onClick={handleRefreshHistory}>
           Refresh history
         </button>
         {recentConversations.length === 0 ? (

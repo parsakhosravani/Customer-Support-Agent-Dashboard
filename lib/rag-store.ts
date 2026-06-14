@@ -1,28 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 
 import { EMBEDDING_DIMENSION, toEmbedding, vectorLiteral } from "@/lib/embeddings";
-
-export type Source = {
-  id: string;
-  title: string;
-  snippet: string;
-};
-
-export type TimelineStep = {
-  tool: string;
-  status: "started" | "completed";
-  detail: string;
-};
-
-export type ConversationRecord = {
-  id: string;
-  merchantId: string;
-  role: "user" | "assistant";
-  content: string;
-  sources: Source[];
-  timeline: TimelineStep[];
-  createdAt: string;
-};
+import type { ConversationRecord, Source, TimelineStep } from "@/lib/types";
 
 type DocumentRecord = {
   id: string;
@@ -34,6 +14,8 @@ type DocumentRecord = {
 
 const memoryDocuments: DocumentRecord[] = [];
 const memoryConversations: ConversationRecord[] = [];
+const MAX_SNIPPET_LENGTH = 220;
+const DEFAULT_SEARCH_LIMIT = 3;
 
 let pool: Pool | null = null;
 let hasInitialized = false;
@@ -90,11 +72,11 @@ async function initializeSchemaIfNeeded(): Promise<boolean> {
 }
 
 function makeId(prefix: string): string {
-  return `${prefix}_${crypto.randomUUID()}`;
+  return `${prefix}_${randomUUID()}`;
 }
 
 function toSnippet(content: string): string {
-  return content.replace(/\s+/g, " ").trim().slice(0, 220);
+  return content.replace(/\s+/g, " ").trim().slice(0, MAX_SNIPPET_LENGTH);
 }
 
 export async function uploadDocument(input: {
@@ -133,11 +115,14 @@ export async function searchDocuments(input: {
   query: string;
   limit?: number;
 }): Promise<Source[]> {
-  const limit = input.limit ?? 3;
+  const limit = input.limit ?? DEFAULT_SEARCH_LIMIT;
   const queryEmbedding = toEmbedding(input.query);
   const isDbReady = await initializeSchemaIfNeeded();
 
   if (!isDbReady) {
+    const dot = (a: number[], b: number[]) =>
+      a.reduce((acc, value, index) => acc + value * (b[index] ?? 0), 0);
+
     return memoryDocuments
       .filter((doc) => doc.merchantId === input.merchantId)
       .map((doc) => ({
@@ -178,10 +163,6 @@ export async function searchDocuments(input: {
     title: row.title,
     snippet: toSnippet(row.content),
   }));
-}
-
-function dot(a: number[], b: number[]): number {
-  return a.reduce((acc, value, index) => acc + value * (b[index] ?? 0), 0);
 }
 
 export async function saveConversation(input: {
@@ -253,7 +234,7 @@ export async function getConversationHistory(
     content: string;
     sources: Source[];
     timeline: TimelineStep[];
-    created_at: string;
+    created_at: string | Date;
   }>(
     `
       SELECT id, merchant_id, role, content, sources, timeline, created_at
@@ -271,6 +252,7 @@ export async function getConversationHistory(
     content: row.content,
     sources: row.sources,
     timeline: row.timeline,
-    createdAt: row.created_at,
+    createdAt:
+      row.created_at instanceof Date ? row.created_at.toISOString() : new Date(row.created_at).toISOString(),
   }));
 }

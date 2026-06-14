@@ -8,6 +8,7 @@ type ChatRequest = {
   merchantId?: string;
   message?: string;
 };
+const FALLBACK_WORD_DELAY_MS = 25;
 
 function toSseEvent(type: string, payload: unknown): string {
   return `event: ${type}\ndata: ${JSON.stringify(payload)}\n\n`;
@@ -17,7 +18,7 @@ async function* fallbackStream(text: string) {
   const words = text.split(" ");
   for (const word of words) {
     yield `${word} `;
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await new Promise((resolve) => setTimeout(resolve, FALLBACK_WORD_DELAY_MS));
   }
 }
 

@@ -13,6 +13,7 @@ SaaS-style support dashboard built with **Next.js + TypeScript** where merchants
 - Next.js App Router + TypeScript
 - AI SDK (`ai`) + OpenAI provider
 - PostgreSQL + `pgvector` (with in-memory fallback if `DATABASE_URL` is not set)
+- Deterministic lightweight embeddings for offline/demo mode (swap with model-based embeddings for production relevance quality)
 
 ## Run locally
 

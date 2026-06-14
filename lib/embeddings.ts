@@ -1,5 +1,9 @@
 export const EMBEDDING_DIMENSION = 32;
 
+/**
+ * Lightweight deterministic embedding for local/demo mode only.
+ * Replace this with model-generated semantic embeddings in production.
+ */
 export function toEmbedding(text: string): number[] {
   const vector = Array.from({ length: EMBEDDING_DIMENSION }, () => 0);
   const normalized = text.toLowerCase();
